@@ -84,7 +84,7 @@ uint64_t flush(uint64_t full_hand)
 {
     uint64_t mask = 0LL;
     uint64_t indicator = 38430716820228224LL; // = 2^7 + 2^11 + 2^15 + 2^19 + 2^23 + 2^27 + 2^31 + 2^35 + 2^39 + 2^43 + 2^47 + 2^51 + 2^55 = every 4th bit is 1 | we OMIT THE LAST BIT to avoid double-counting aces
-    for(int i = 0; i < 4; indicator = indicator >> 1) //check all four suits, bit-shifting one to the right each time
+    for(int i = 0; i < 4; indicator = indicator >> 1, i++) //check all four suits, bit-shifting one to the right each time
     {
         uint64_t temp_mask = full_hand & indicator;
         int suit_count = count_binary_ones(temp_mask);
