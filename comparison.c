@@ -1,13 +1,14 @@
 #include <stdint.h>
 
-#define STRAIGHT_FLUSH_BIT_OFFSET 35
-#define FOUR_OF_A_KIND_BIT_OFFSET 31
-#define FULL_HOUSE_BIT_OFFSET 27
-#define FLUSH_BIT_OFFSET 26
-#define STRAIGHT_BIT_OFFSET 25
-#define THREE_OF_A_KIND_BIT_OFFSET 21
-#define TWO_PAIR_INDICATOR_BIT_OFFSET 20
-#define PAIR_BIT_OFFSET 15
+#define STRAIGHT_FLUSH_BIT_OFFSET 34
+#define FOUR_OF_A_KIND_BIT_OFFSET 30
+#define FULL_HOUSE_BIT_OFFSET 26
+#define FLUSH_BIT_OFFSET 25
+#define STRAIGHT_BIT_OFFSET 24
+#define THREE_OF_A_KIND_BIT_OFFSET 20
+#define TWO_PAIR_INDICATOR_BIT_OFFSET 19
+#define PAIR_BIT_OFFSET 14
+#define TOP_HAND_BIT_OFFSET 13
 
 int bitwise_contains(uint64_t full_sequence, uint64_t contained_sequence)
 {
@@ -30,7 +31,7 @@ uint64_t get_n_highest_cards(uint64_t hand, int n, int start_index, int jump_siz
     uint64_t ret = 0;
     int card_count = 0;
     int bit_shift = start_index; //start at the highest card slot for the flush's suit
-    int card_index = 15;
+    int card_index = TOP_HAND_BIT_OFFSET;
     do
     {
         uint64_t extracted_bit = (hand & (1 << bit_shift)) >> bit_shift;
@@ -93,11 +94,11 @@ uint64_t flush(uint64_t full_hand)
             {
                 temp_mask = get_n_highest_cards(full_hand, 5, 55 - i, 4); //get the 5 highest cards of the flush, starting at the correct suit at the high aces (55-i), and jump one card level at a time
             }
-            mask = temp_mask; //return the five flush cards, plus the flush bit indicator
+            mask = temp_mask | (1 << FLUSH_BIT_OFFSET); //return the five flush cards, plus the flush bit indicator
             break; //no more than one flush can happen in 7 cards; once we find one, we're done
         }
     }
-    return mask | (1 << FLUSH_BIT_OFFSET);
+    return mask;
 }
 
 uint64_t multiples(uint64_t full_hand, uint64_t straight_hand)
@@ -105,7 +106,7 @@ uint64_t multiples(uint64_t full_hand, uint64_t straight_hand)
     int high_pairs[2] = {0, 0};
     int high_three_of_a_kind= 0;
     int high_four_of_a_kind = 0;
-    int i = 15;
+    int i = TOP_HAND_BIT_OFFSET;
 
     for(uint64_t hand = full_hand; hand > 2 ; hand = hand << 4, i--) //[i] keeps track of what card we're on, hand always has the [i]th card in the rightmost 4 bits | [i] starts at 2 so that pairs of aces are considered pairs of 14s, not pairs of 1s
     {
@@ -143,7 +144,7 @@ uint64_t multiples(uint64_t full_hand, uint64_t straight_hand)
             return (high_three_of_a_kind << FULL_HOUSE_BIT_OFFSET) | (1 << high_three_of_a_kind) | (1 << high_pairs[0]); //return the top card in the full house in that indicator, and mark the cards involved
         }
         //otherwise
-        uint64_t top_two_other_cards = get_n_highest_cards(straight_hand ^ (1 << high_three_of_a_kind), 2, 15, 1);
+        uint64_t top_two_other_cards = get_n_highest_cards(straight_hand ^ (1 << high_three_of_a_kind), 2, TOP_HAND_BIT_OFFSET, 1);
         return (high_three_of_a_kind << THREE_OF_A_KIND_BIT_OFFSET) | (1 << high_three_of_a_kind) | top_two_other_cards; //return the card in the three-of-a-kind, and mark the 3-kind card plus the two other highest cards that aren't the 3-kind card
     }
     //otherwise
@@ -151,14 +152,15 @@ uint64_t multiples(uint64_t full_hand, uint64_t straight_hand)
     {
         if(high_pairs[1]) //and there's another pair
         {
-            uint64_t top_one_other_card = get_n_highest_cards(straight_hand ^ (1 << high_pairs[0]) ^ (1 << high_pairs[1]), 1, 15, 1);
+            uint64_t top_one_other_card = get_n_highest_cards(straight_hand ^ (1 << high_pairs[0]) ^ (1 << high_pairs[1]), 1, TOP_HAND_BIT_OFFSET, 1);
             return (1 << TWO_PAIR_INDICATOR_BIT_OFFSET) | ((high_pairs[0] + high_pairs[1]) << PAIR_BIT_OFFSET) | (1 << high_pairs[0]) | (1 << high_pairs[1]); //return the two pair bit, the sum of the two pairs in the pair bits, and mark the pair cards plus the one other highest card that isn't a pair card
         }
         //otherwise, if it's just one pair
+        uint64_t top_one_other_card = get_n_highest_cards(straight_hand ^ (1 << high_pairs[0]), 1, TOP_HAND_BIT_OFFSET, 1);
         return (high_pairs[0] << PAIR_BIT_OFFSET) | (1 << high_pairs[0]); //return the pair card in the pair bits, and mark the card involved
     }
     //otherwise, if there are no pairs
-    return get_n_highest_cards(straight_hand, 5, 15, 1); //we can iterate over straight_hand here, since no pairs means all relevant cards are distinct when classified by number
+    return get_n_highest_cards(straight_hand, 5, 13, 1); //we can iterate over straight_hand here, since no pairs means all relevant cards are distinct when classified by number
 }
 
 uint64_t rate_hand(uint64_t full_hand, uint16_t straight_hand)
