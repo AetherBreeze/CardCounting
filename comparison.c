@@ -173,7 +173,7 @@ uint64_t rate_hand(uint64_t full_hand, uint16_t straight_hand)
     uint64_t flush_score = flush(full_hand);
     uint64_t multiple_score = multiples(full_hand, straight_hand);
 
-    if((!flush_score && !straight_score) || multiple_score & (1 << FLUSH_BIT_OFFSET)) //if there's no flush, and no straight, OR the multiples are better than a flush (since we know there isn't a straight flush)
+    if((!flush_score && !straight_score) || multiple_score > (1 << FLUSH_BIT_OFFSET)) //if there's no flush, and no straight, OR the multiples are better than a flush (since we know there isn't a straight flush)
     {
         return multiple_score; //then the best hand consists of whatever multiples you had
     }
