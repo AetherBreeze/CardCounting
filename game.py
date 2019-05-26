@@ -61,14 +61,17 @@ class Player:
             for card in cards:
                 full_hand = full_hand | card.value_full #this adds the card's full_hand bit to full_hand
                 straight_hand = straight_hand | card.value_straight #this adds the card's number bit to straight_hand, if it isn't there already
-        return compare.rate_hand(full_hand, straight_hand)
-
+        print("full hand: {}\n".format(full_hand))
+        ret = compare.rate_hand(full_hand, straight_hand)
+        if (ret < 0): #if it's negative, then python tried to interpret it as a signed 32 bit int
+                return ret & 0xffffffff  #so we have to do this slightly time-intensive type conversion
+        return ret #otherwise, we can just return the value
 
     def take_action(self):
         #YOUR CODE HERE
         print("\n")
         for card in self.hand:
-            print("{} of {}s\t".format(card.number, card.suit))
+            print("{} of {}\t".format(card.number, card.suit))
         return 0
 
 
@@ -135,7 +138,7 @@ class Table:
         #TEMPORARY
         print("\n")
         for card in self.table_cards:
-            print("{} of {}s\t".format(card.number, card.suit))
+            print("{} of {}\t".format(card.number, card.suit))
         print("\n")
 
         for player in self.players:
@@ -163,11 +166,11 @@ class Table:
                 actions_since_last_raise = 0
             else:
                 actions_since_last_raise += 1
-                
+
             if actions_since_last_raise == len(self.players):
                 return
             player_acting = (player_acting + 1) % len(self.players)
-            
+
 def main():
     table = Table(4, [5, 10, 20, 50], 500)
     table.play_games(1)
