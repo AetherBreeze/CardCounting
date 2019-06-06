@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include <stdio.h>
 
 #define STRAIGHT_FLUSH_BIT_OFFSET 36
 #define FOUR_OF_A_KIND_BIT_OFFSET 32
@@ -118,25 +117,21 @@ uint64_t multiples(uint64_t full_hand, uint64_t straight_hand)
             {
                 if(!high_pairs[0]) //if there isn't a highest pair yet
                 {
-                    printf("found high pair %d\n", i+1);
                     high_pairs[0] = i; //then this pair is highest pair | +1 because [i] is one below the card's rank, i.e. 4 is stored in 2^3
                 }
                 else if(high_pairs[0] && !high_pairs[1]) //if there's already a highest pair, but no second highest
                 {
-                    printf("found second high pair %d\n", i+1);
                     high_pairs[1] = i; //then this pair is second highest pair | +1 because [i] is 1 below the card's rank, i.e. 12 is stored in 2^11
                 }
                 continue; //no need to check for 3s or 4s if its definitely a pair
             }
             if((indicator == 7 || indicator == 11 || indicator == 13 || indicator == 14) && !high_three_of_a_kind) //checking equality to 0111, 1011, 1101, 1110
             {
-                printf("found three of a kind %d\n", i+1);
                 high_three_of_a_kind = i; //plus one, because the index of a card is one below its rank (i.e., 2s are stored in 2^1)
                 continue; //no need to check for 4s if its definitely a 3
             }
             if(indicator == 15)
             {
-                printf("found four of a kind %d\n", i+1);
                 return ((uint64_t)(i+1LL) << FOUR_OF_A_KIND_BIT_OFFSET) | (1 << i); //if we find a 4-of-a-kind, stop; there's no better multiples to be found  | return the index of the 4-of-a-kind and the indicator bit | +1 because [i] is one below the card's rank, i.e. 7s are stored in 2^6
             }
         }
@@ -178,7 +173,7 @@ uint64_t rate_hand(uint64_t full_hand, uint16_t straight_hand)
     uint64_t flush_score = flush(full_hand);
     uint64_t multiple_score = multiples(full_hand, straight_hand);
 
-    if((!flush_score && !straight_score) || multiple_score & (1 << FLUSH_BIT_OFFSET)) //if there's no flush, and no straight, OR the multiples are better than a flush (since we know there isn't a straight flush)
+    if((!flush_score && !straight_score) || multiple_score > (1 << FLUSH_BIT_OFFSET)) //if there's no flush, and no straight, OR the multiples are better than a flush (since we know there isn't a straight flush)
     {
         return multiple_score; //then the best hand consists of whatever multiples you had
     }
