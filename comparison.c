@@ -68,8 +68,8 @@ int straight_flush(uint64_t full_hand, int low_card)
 uint64_t straight(uint64_t full_hand, uint16_t straight_hand)
 {
     uint64_t mask = 0LL;
-    uint64_t indicator = 31LL; //31 = 2^4 + 2^3 + 2^2 + 2^1 + 2^0 = b11111
-    for(int i = 9; straight_hand > indicator; indicator = indicator << 1, i--) //[i] counts the lowest card in the straight
+    uint64_t indicator = 15872LL; //31 = 2^13 + 2^12 + 2^11 + 2^10 + 2^9 = b11111000000000
+    for(int i = 9; straight_hand > indicator; indicator = indicator >> 1, i--) //[i] counts the lowest card in the straight
     {
         if(bitwise_contains((uint64_t)straight_hand, indicator))
         {
