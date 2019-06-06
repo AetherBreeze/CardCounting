@@ -68,17 +68,19 @@ int straight_flush(uint64_t full_hand, int low_card)
 uint64_t straight(uint64_t full_hand, uint16_t straight_hand)
 {
     uint64_t mask = 0LL;
-    int straight_flush_found = 0;
     uint64_t indicator = 31LL; //31 = 2^4 + 2^3 + 2^2 + 2^1 + 2^0 = b11111
     for(int i = 9; straight_hand > indicator; indicator = indicator << 1, i--) //[i] counts the lowest card in the straight
     {
         if(bitwise_contains((uint64_t)straight_hand, indicator))
         {
             int sf = straight_flush(full_hand, i); //check if this straight is also a flush
-            if(!mask || !straight_flush && sf) //if there's no straight yet, or if there is, but not a straight flush
+            if(!mask || sf) //if there's no straight yet, or if this is a straight flush
             {
                 mask = indicator | (1 << STRAIGHT_BIT_OFFSET) | ((uint64_t)sf << STRAIGHT_FLUSH_BIT_OFFSET); //store the list of 1's in the position corresponding to the flush cards
-	    	straight_flush_found = sf; //record whether this is a straight flush
+	    	if(sf) //if this does happen to be a straight flush
+                {
+                    break; //quit looking now, nothing beats the highest available straight flush
+                }
 	    }
         }
     }
