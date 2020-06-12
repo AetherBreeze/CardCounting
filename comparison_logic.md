@@ -54,3 +54,9 @@ check for others, in case they're straight flushes).
 Shifting `1111b` to the left to line it up with the high aces and taking the AND, we get:
 
 ![and that returns 0](https://i.imgur.com/rEnafs3.png)
+
+The AND just gives us zero -- guess there's no aces here. Let's check for kings:
+
+![and that returns 1](https://i.imgur.com/YwcQBIN.png)
+
+It's nonzero! There's at least one king, which is all that matters for a straight.
